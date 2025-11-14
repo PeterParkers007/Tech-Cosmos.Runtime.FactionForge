@@ -242,21 +242,14 @@ FactionForge/
 │   ├── Faction.cs                 # 阵营数据类
 │   ├── FactionRelationship.cs     # 关系枚举
 │   └── SerializableDictionary.cs  # 序列化字典
-├── Editor/
-│   ├── FactionSystemEditor.cs     # Manager编辑器
-│   ├── FactionMemberEditor.cs     # Member智能编辑器
-│   └── FactionRelationshipWindow.cs # 关系可视化窗口
-└── Samples/
-    ├── BasicUsage/                # 基础使用示例
-    └── AdvancedAIIntegration/     # AI集成示例
+└── Editor/
+    ├── FactionSystemEditor.cs     # Manager编辑器
+    ├── FactionMemberEditor.cs     # Member智能编辑器
+    └── FactionRelationshipWindow.cs # 关系可视化窗口
+
 ```
 
 ## 🤝 支持与贡献
-
-### 文档与支持
-- 📚 [在线文档](https://techcosmos.github.io/FactionForge)
-- 🐛 [提交 Issue](https://github.com/TechCosmos/FactionForge/issues)
-- 💬 [讨论区](https://github.com/TechCosmos/FactionForge/discussions)
 
 ### 贡献指南
 1. Fork 本项目
