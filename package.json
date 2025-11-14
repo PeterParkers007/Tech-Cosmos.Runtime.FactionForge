@@ -1,0 +1,25 @@
+{
+  "name": "com.techcosmos.factionforge",
+  "displayName": "FactionForge - 阵营关系系统",
+  "version": "1.0.0",
+  "description": "一个强大的可视化阵营关系配置工具，支持动态阵营管理和复杂关系网络配置",
+  "category": "Tools",
+  "keywords": [
+    "faction",
+    "relationship",
+    "diplomacy", 
+    "system",
+    "editor",
+    "tool",
+    "configuration",
+    "AI",
+    "gameplay"
+  ],
+  "author": {
+    "name": "Tech-Cosmos",
+    "email": "3427463164@qq.com",
+    "url": "https://github.com/PeterParkers007/Tech-Cosmos"
+  },
+  "unity": "2021.3",
+  "unityRelease": "0f1"
+}
