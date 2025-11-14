@@ -13,7 +13,7 @@ namespace TechCosmos.FactionForge.Editor
         private float lastRefreshTime;
         private const float REFRESH_INTERVAL = 1.0f; // 每秒自动刷新一次
 
-        [MenuItem("Tools/FactionForge/阵营关系可视化 &f")]
+        [MenuItem("Tech-Cosmos/阵营关系可视化窗口")]
         public static void ShowWindow()
         {
             var window = GetWindow<FactionRelationshipWindow>("阵营关系");
