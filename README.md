@@ -29,9 +29,9 @@
 
 1. **创建阵营管理器**
 ```csharp
-   // 在场景中创建空物体并添加FactionManager组件
-   // 或通过代码创建：
-   var factionManager = new GameObject("FactionManager").AddComponent<FactionManager>();
+// 在场景中创建空物体并添加FactionManager组件
+// 或通过代码创建：
+var factionManager = new GameObject("FactionManager").AddComponent<FactionManager>();
 ```
 
 2. **配置阵营关系**
@@ -41,26 +41,26 @@
    - 设置各阵营间的关系：友好、中立、敌对、同盟
 
 3. **在代码中使用**
-   ```csharp
-   // 查询两个阵营的关系
-   var relationship = FactionManager.Instance.GetRelationship("人类", "兽人");
-   
-   switch (relationship)
-   {
-       case FactionRelationship.Friendly:
-           // 友好逻辑
-           break;
-       case FactionRelationship.Hostile:
-           // 敌对逻辑 - 触发战斗
-           break;
-       case FactionRelationship.Allied:
-           // 同盟逻辑 - 共享资源
-           break;
-       default:
-           // 中立逻辑
-           break;
-   }
-   ```
+```csharp
+// 查询两个阵营的关系
+var relationship = FactionManager.Instance.GetRelationship("人类", "兽人");
+
+switch (relationship)
+{
+    case FactionRelationship.Friendly:
+        // 友好逻辑
+        break;
+    case FactionRelationship.Hostile:
+        // 敌对逻辑 - 触发战斗
+        break;
+    case FactionRelationship.Allied:
+        // 同盟逻辑 - 共享资源
+        break;
+    default:
+        // 中立逻辑
+        break;
+}
+```
 
 ## 📖 API 参考
 
