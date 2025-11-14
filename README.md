@@ -19,9 +19,9 @@
 ### 安装
 
 1. 通过Unity Package Manager安装：
-   ```
-   https://github.com/TechCosmos/FactionForge.git
-   ```
+```
+https://github.com/TechCosmos/FactionForge.git
+```
 
 2. 或下载后放入项目的 `Packages` 目录
 
@@ -35,10 +35,10 @@ var factionManager = new GameObject("FactionManager").AddComponent<FactionManage
 ```
 
 2. **配置阵营关系**
-   - 在Inspector中点击"添加新阵营"
-   - 输入阵营名称（如"人类"、"兽人"、"精灵"）
-   - 当有≥2个阵营时，自动显示关系配置矩阵
-   - 设置各阵营间的关系：友好、中立、敌对、同盟
+- 在Inspector中点击"添加新阵营"
+- 输入阵营名称（如"人类"、"兽人"、"精灵"）
+- 当有≥2个阵营时，自动显示关系配置矩阵
+- 设置各阵营间的关系：友好、中立、敌对、同盟
 
 3. **在代码中使用**
 ```csharp
