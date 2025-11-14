@@ -20,7 +20,7 @@
 
 1. 通过Unity Package Manager安装：
 ```
-https://github.com/TechCosmos/FactionForge.git
+https://github.com/PeterParkers007/Tech-Cosmos.Runtime.FactionForge.git
 ```
 
 2. 或下载后放入项目的 `Packages` 目录
