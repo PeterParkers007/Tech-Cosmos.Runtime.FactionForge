@@ -1,8 +1,8 @@
 {
   "name": "com.techcosmos.factionforge",
-  "displayName": "FactionForge - 阵营关系系统",
+  "displayName": "FactionForge - 闃佃惀鍏崇郴绯荤粺",
   "version": "1.0.0",
-  "description": "一个强大的可视化阵营关系配置工具，支持动态阵营管理和复杂关系网络配置",
+  "description": "涓�涓己澶х殑鍙鍖栭樀钀ュ叧绯婚厤缃伐鍏凤紝鏀寔鍔ㄦ�侀樀钀ョ鐞嗗拰澶嶆潅鍏崇郴缃戠粶閰嶇疆",
   "category": "Tools",
   "keywords": [
     "faction",
