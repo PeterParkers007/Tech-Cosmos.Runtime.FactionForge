@@ -10,6 +10,11 @@ namespace TechCosmos.FactionForge.Runtime
 
         public string FactionName => factionName;
         public event System.Action<string> OnFactionChanged;
+        public void SetCanChangeFaction(bool canChange)
+        {
+            canChangeFaction = canChange;
+            Debug.Log($"角色 {gameObject.name} 的阵营变更权限已设置为 {(canChange ? "可更改" : "不可更改")}");
+        }
 
         public void SetFaction(string newFaction)
         {
