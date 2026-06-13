@@ -123,7 +123,7 @@ namespace TechCosmos.FactionForge.Editor
                         if (i == j)
                         {
                             // 对角线 - 显示为自身
-                            EditorGUILayout.LabelField("自身", GetCellStyle(FactionRelationship.Neutral), GUILayout.Width(80));
+                            EditorGUILayout.LabelField("自身", GetCellStyle(FactionRelationship.Friendly), GUILayout.Width(80));
                         }
                         else
                         {

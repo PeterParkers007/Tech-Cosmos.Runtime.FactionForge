@@ -69,6 +69,10 @@ namespace TechCosmos.FactionForge.Runtime
         // 公开API
         public FactionRelationship GetRelationship(string factionA, string factionB)
         {
+            // 如果是同一个阵营，返回友方
+            if (factionA == factionB)
+                return FactionRelationship.Friendly;
+
             var faction = factions.Find(f => f.factionName == factionA);
             if (faction != null && faction.relationships.ContainsKey(factionB))
             {
