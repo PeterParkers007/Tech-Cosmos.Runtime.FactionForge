@@ -1,7 +1,6 @@
-#if UNITY_EDITOR
+ï»¿#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
 using TechCosmos.FactionForge.Runtime;
 
 namespace TechCosmos.FactionForge.Editor
@@ -11,12 +10,12 @@ namespace TechCosmos.FactionForge.Editor
         private Vector2 scrollPosition;
         private bool autoRefresh = true;
         private float lastRefreshTime;
-        private const float REFRESH_INTERVAL = 1.0f; // Ã¿Ãë×Ô¶¯Ë¢ĞÂÒ»´Î
+        private const float REFRESH_INTERVAL = 1.0f;
 
-        [MenuItem("Tech-Cosmos/ÕóÓª¹ØÏµ¿ÉÊÓ»¯´°¿Ú")]
+        [MenuItem("Tech-Cosmos/é˜µè¥å…³ç³»å¯è§†åŒ–çª—å£")]
         public static void ShowWindow()
         {
-            var window = GetWindow<FactionRelationshipWindow>("ÕóÓª¹ØÏµ");
+            var window = GetWindow<FactionRelationshipWindow>("é˜µè¥å…³ç³»");
             window.minSize = new Vector2(400, 500);
             window.Show();
         }
@@ -39,7 +38,6 @@ namespace TechCosmos.FactionForge.Editor
             }
             EditorGUILayout.EndScrollView();
 
-            // ×Ô¶¯Ë¢ĞÂ
             if (autoRefresh && EditorApplication.timeSinceStartup - lastRefreshTime > REFRESH_INTERVAL)
             {
                 RefreshData();
@@ -51,28 +49,24 @@ namespace TechCosmos.FactionForge.Editor
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             {
-                // ±êÌâ
-                EditorGUILayout.LabelField("ÕóÓª¹ØÏµ×ÜÀÀ", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("é˜µè¥å…³ç³»æ€»è§ˆ", EditorStyles.boldLabel);
 
                 GUILayout.FlexibleSpace();
 
-                // ×Ô¶¯Ë¢ĞÂ¿ª¹Ø
-                autoRefresh = GUILayout.Toggle(autoRefresh, "×Ô¶¯Ë¢ĞÂ", EditorStyles.toolbarButton);
+                autoRefresh = GUILayout.Toggle(autoRefresh, "è‡ªåŠ¨åˆ·æ–°", EditorStyles.toolbarButton);
 
-                // ÊÖ¶¯Ë¢ĞÂ°´Å¥
-                if (GUILayout.Button("Ë¢ĞÂ", EditorStyles.toolbarButton))
-                {
+                bool bidirectional = FactionEditorSettings.BidirectionalEditMode;
+                bool newBidirectional = GUILayout.Toggle(bidirectional, "åŒå‘ç»‘å®š", EditorStyles.toolbarButton);
+                if (newBidirectional != bidirectional)
+                    FactionEditorSettings.BidirectionalEditMode = newBidirectional;
+
+                if (GUILayout.Button("åˆ·æ–°", EditorStyles.toolbarButton))
                     RefreshData();
-                }
 
-                // ´ò¿ª¹ÜÀíÆ÷°´Å¥
-                if (GUILayout.Button("´ò¿ª¹ÜÀíÆ÷", EditorStyles.toolbarButton))
-                {
+                if (GUILayout.Button("æ‰“å¼€ç®¡ç†å™¨", EditorStyles.toolbarButton))
                     Selection.activeObject = FindFactionManager()?.gameObject;
-                }
 
-                // ´´½¨¹ÜÀíÆ÷°´Å¥
-                if (GUILayout.Button("´´½¨¹ÜÀíÆ÷", EditorStyles.toolbarButton))
+                if (GUILayout.Button("åˆ›å»ºç®¡ç†å™¨", EditorStyles.toolbarButton))
                 {
                     CreateFactionManager();
                     RefreshData();
@@ -87,90 +81,102 @@ namespace TechCosmos.FactionForge.Editor
 
             if (manager == null || manager.factions.Count == 0)
             {
-                EditorGUILayout.HelpBox("Î´ÕÒµ½ÕóÓªÊı¾İ\nÇëÏÈ´´½¨ FactionManager ²¢Ìí¼ÓÕóÓª", MessageType.Info);
+                EditorGUILayout.HelpBox("æœªæ‰¾åˆ°é˜µè¥æ•°æ®\nè¯·å…ˆåˆ›å»º FactionManager å¹¶æ·»åŠ é˜µè¥", MessageType.Info);
                 return;
             }
 
-            EditorGUILayout.LabelField("¹ØÏµ¾ØÕó", EditorStyles.boldLabel);
+            if (manager.HasDuplicateFactionNames())
+                EditorGUILayout.HelpBox("å­˜åœ¨é‡å¤çš„é˜µè¥åç§°ï¼Œè¯·å…ˆä¿®æ­£åå†ç¼–è¾‘å…³ç³»ã€‚", MessageType.Error);
+
+            EditorGUILayout.LabelField("å…³ç³»çŸ©é˜µ", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
 
-            // ±íÍ·
             EditorGUILayout.BeginHorizontal();
             {
-                EditorGUILayout.LabelField("ÕóÓª", EditorStyles.boldLabel, GUILayout.Width(120));
+                EditorGUILayout.LabelField("é˜µè¥", EditorStyles.boldLabel, GUILayout.Width(120));
                 foreach (var faction in manager.factions)
-                {
                     EditorGUILayout.LabelField(faction.factionName, EditorStyles.boldLabel, GUILayout.Width(80));
-                }
             }
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space(5);
 
-            // ¹ØÏµ¾ØÕó
             for (int i = 0; i < manager.factions.Count; i++)
             {
                 var currentFaction = manager.factions[i];
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    // ĞĞÍ· - ÕóÓªÃû³Æ
                     EditorGUILayout.LabelField(currentFaction.factionName, GUILayout.Width(120));
 
-                    // ¹ØÏµµ¥Ôª¸ñ
                     for (int j = 0; j < manager.factions.Count; j++)
                     {
                         if (i == j)
                         {
-                            // ¶Ô½ÇÏß - ÏÔÊ¾Îª×ÔÉí
-                            EditorGUILayout.LabelField("×ÔÉí", GetCellStyle(FactionRelationship.Friendly), GUILayout.Width(80));
+                            EditorGUILayout.LabelField("è‡ªèº«", GetCellStyle(FactionRelationship.Friendly), GUILayout.Width(80));
+                            continue;
                         }
-                        else
-                        {
-                            var otherFaction = manager.factions[j];
-                            var relationship = manager.GetRelationship(currentFaction.factionName, otherFaction.factionName);
 
-                            if (GUILayout.Button(relationship.ToString(), GetCellStyle(relationship), GUILayout.Width(80)))
-                            {
-                                // µã»÷µ¥Ôª¸ñ¿ìËÙĞŞ¸Ä¹ØÏµ
-                                ShowRelationshipQuickMenu(currentFaction.factionName, otherFaction.factionName, relationship);
-                            }
+                        var otherFaction = manager.factions[j];
+                        if (!manager.CanConfigureRelationship(currentFaction.factionName, otherFaction.factionName))
+                        {
+                            EditorGUILayout.LabelField("-", EditorStyles.centeredGreyMiniLabel, GUILayout.Width(80));
+                            continue;
+                        }
+
+                        var relationship = manager.GetRelationship(currentFaction.factionName, otherFaction.factionName);
+                        var reverseRelationship = manager.GetRelationship(otherFaction.factionName, currentFaction.factionName);
+                        bool isAsymmetric = relationship != reverseRelationship;
+
+                        var cellStyle = GetCellStyle(relationship);
+                        if (isAsymmetric && !FactionEditorSettings.BidirectionalEditMode)
+                            cellStyle.fontStyle = FontStyle.Bold;
+
+                        string label = isAsymmetric && !FactionEditorSettings.BidirectionalEditMode
+                            ? $"{relationship}â‰ "
+                            : relationship.ToString();
+
+                        if (GUILayout.Button(label, cellStyle, GUILayout.Width(80)))
+                        {
+                            ShowRelationshipQuickMenu(
+                                currentFaction.factionName,
+                                otherFaction.factionName,
+                                relationship);
                         }
                     }
                 }
                 EditorGUILayout.EndHorizontal();
 
-                // ĞĞ¼ä¸ô
                 if (i < manager.factions.Count - 1)
-                {
                     EditorGUILayout.Space(2);
-                }
             }
         }
 
         private void DrawStatistics()
         {
             var manager = FindFactionManager();
-            if (manager == null || manager.factions.Count == 0) return;
+            if (manager == null || manager.factions.Count == 0)
+                return;
 
             EditorGUILayout.Space(15);
-            EditorGUILayout.LabelField("Í³¼ÆĞÅÏ¢", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("ç»Ÿè®¡ä¿¡æ¯", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginVertical("box");
             {
-                EditorGUILayout.LabelField($"×ÜÕóÓªÊıÁ¿: {manager.factions.Count}");
+                EditorGUILayout.LabelField($"æ€»é˜µè¥æ•°é‡: {manager.factions.Count}");
 
-                // Í³¼Æ¸÷ÖÖ¹ØÏµµÄÊıÁ¿
                 int hostileCount = 0, friendlyCount = 0, alliedCount = 0, neutralCount = 0;
 
                 for (int i = 0; i < manager.factions.Count; i++)
                 {
                     for (int j = i + 1; j < manager.factions.Count; j++)
                     {
-                        var rel = manager.GetRelationship(
-                            manager.factions[i].factionName,
-                            manager.factions[j].factionName
-                        );
+                        var nameA = manager.factions[i].factionName;
+                        var nameB = manager.factions[j].factionName;
+                        if (!manager.CanConfigureRelationship(nameA, nameB))
+                            continue;
+
+                        var rel = manager.GetRelationship(nameA, nameB);
 
                         switch (rel)
                         {
@@ -184,15 +190,15 @@ namespace TechCosmos.FactionForge.Editor
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    EditorGUILayout.LabelField($"µĞ¶Ô¹ØÏµ: {hostileCount}", GetMiniLabelStyle(Color.red));
-                    EditorGUILayout.LabelField($"ÓÑºÃ¹ØÏµ: {friendlyCount}", GetMiniLabelStyle(Color.green));
+                    EditorGUILayout.LabelField($"æ•Œå¯¹å…³ç³»: {hostileCount}", GetMiniLabelStyle(Color.red));
+                    EditorGUILayout.LabelField($"å‹å¥½å…³ç³»: {friendlyCount}", GetMiniLabelStyle(Color.green));
                 }
                 EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    EditorGUILayout.LabelField($"Í¬ÃË¹ØÏµ: {alliedCount}", GetMiniLabelStyle(Color.cyan));
-                    EditorGUILayout.LabelField($"ÖĞÁ¢¹ØÏµ: {neutralCount}", GetMiniLabelStyle(Color.gray));
+                    EditorGUILayout.LabelField($"åŒç›Ÿå…³ç³»: {alliedCount}", GetMiniLabelStyle(Color.cyan));
+                    EditorGUILayout.LabelField($"ä¸­ç«‹å…³ç³»: {neutralCount}", GetMiniLabelStyle(Color.gray));
                 }
                 EditorGUILayout.EndHorizontal();
             }
@@ -231,15 +237,15 @@ namespace TechCosmos.FactionForge.Editor
 
         private void ShowRelationshipQuickMenu(string factionA, string factionB, FactionRelationship currentRelationship)
         {
-            GenericMenu menu = new GenericMenu();
+            var menu = new GenericMenu();
 
-            menu.AddItem(new GUIContent($"ÉèÎªµĞ¶Ô"), currentRelationship == FactionRelationship.Hostile,
+            menu.AddItem(new GUIContent("è®¾ä¸ºæ•Œå¯¹"), currentRelationship == FactionRelationship.Hostile,
                 () => SetRelationship(factionA, factionB, FactionRelationship.Hostile));
-            menu.AddItem(new GUIContent($"ÉèÎªÖĞÁ¢"), currentRelationship == FactionRelationship.Neutral,
+            menu.AddItem(new GUIContent("è®¾ä¸ºä¸­ç«‹"), currentRelationship == FactionRelationship.Neutral,
                 () => SetRelationship(factionA, factionB, FactionRelationship.Neutral));
-            menu.AddItem(new GUIContent($"ÉèÎªÓÑºÃ"), currentRelationship == FactionRelationship.Friendly,
+            menu.AddItem(new GUIContent("è®¾ä¸ºå‹å¥½"), currentRelationship == FactionRelationship.Friendly,
                 () => SetRelationship(factionA, factionB, FactionRelationship.Friendly));
-            menu.AddItem(new GUIContent($"ÉèÎªÍ¬ÃË"), currentRelationship == FactionRelationship.Allied,
+            menu.AddItem(new GUIContent("è®¾ä¸ºåŒç›Ÿ"), currentRelationship == FactionRelationship.Allied,
                 () => SetRelationship(factionA, factionB, FactionRelationship.Allied));
 
             menu.ShowAsContext();
@@ -248,13 +254,20 @@ namespace TechCosmos.FactionForge.Editor
         private void SetRelationship(string factionA, string factionB, FactionRelationship relationship)
         {
             var manager = FindFactionManager();
-            if (manager != null)
+            if (manager == null)
+                return;
+
+            if (!FactionEditorUtility.TrySetRelationship(manager, factionA, factionB, relationship))
             {
-                manager.SetRelationship(factionA, factionB, relationship);
-                EditorUtility.SetDirty(manager);
-                RefreshData();
-                Debug.Log($"ÒÑÉèÖÃ {factionA} Óë {factionB} µÄ¹ØÏµÎª {relationship}");
+                Debug.LogWarning($"æ— æ³•è®¾ç½® {factionA} ä¸ {factionB} çš„å…³ç³»ï¼Œè¯·æ£€æŸ¥é˜µè¥åç§°æ˜¯å¦æœ‰æ•ˆã€‚");
+                return;
             }
+
+            RefreshData();
+            Repaint();
+
+            var syncHint = FactionEditorSettings.BidirectionalEditMode ? "ï¼ˆå·²åŒæ­¥åŒå‘ï¼‰" : string.Empty;
+            Debug.Log($"å·²è®¾ç½® {factionA} ä¸ {factionB} çš„å…³ç³»ä¸º {relationship}{syncHint}");
         }
 
         private void RefreshData()
@@ -266,6 +279,7 @@ namespace TechCosmos.FactionForge.Editor
         {
             if (FactionManager.Instance != null)
                 return FactionManager.Instance;
+
             return FindObjectOfType<FactionManager>();
         }
 
@@ -274,11 +288,10 @@ namespace TechCosmos.FactionForge.Editor
             var managerObj = new GameObject("FactionManager");
             managerObj.AddComponent<FactionManager>();
             EditorUtility.SetDirty(managerObj);
-            Debug.Log("ÒÑ´´½¨ FactionManager");
+            Debug.Log("å·²åˆ›å»º FactionManager");
         }
 
-        // ÔÚProject´°¿ÚÖĞÓÒ¼ü´´½¨²Ëµ¥
-        [MenuItem("GameObject/Tools/FactionForge/´´½¨ÕóÓª¹ÜÀíÆ÷", false, 0)]
+        [MenuItem("GameObject/Tools/FactionForge/åˆ›å»ºé˜µè¥ç®¡ç†å™¨", false, 0)]
         static void CreateFactionManagerMenu()
         {
             var managerObj = new GameObject("FactionManager");

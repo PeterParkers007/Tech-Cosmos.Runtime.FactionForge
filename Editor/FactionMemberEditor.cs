@@ -13,7 +13,7 @@ namespace TechCosmos.FactionForge.Editor
         private SerializedProperty factionNameProperty;
         private SerializedProperty canChangeFactionProperty;
 
-        // 缓存阵营列表和名称
+        // ????????б???????
         private string[] factionNameArray = new string[0];
         private int selectedFactionIndex = 0;
         private bool showCustomInput = false;
@@ -32,9 +32,9 @@ namespace TechCosmos.FactionForge.Editor
             serializedObject.Update();
 
             EditorGUILayout.Space(5);
-            EditorGUILayout.LabelField("阵营配置", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("???????", EditorStyles.boldLabel);
 
-            // 1. 智能阵营选择器
+            // 1. ????????????
             DrawSmartFactionSelector();
 
             EditorGUILayout.Space(5);
@@ -42,12 +42,12 @@ namespace TechCosmos.FactionForge.Editor
 
             EditorGUILayout.Space(10);
 
-            // 2. 阵营关系预览
+            // 2. ?????????
             DrawRelationshipPreview();
 
             EditorGUILayout.Space(10);
 
-            // 3. 快速操作按钮
+            // 3. ??????????
             DrawQuickActions();
 
             serializedObject.ApplyModifiedProperties();
@@ -59,23 +59,23 @@ namespace TechCosmos.FactionForge.Editor
 
             EditorGUILayout.BeginVertical("box");
             {
-                EditorGUILayout.LabelField("阵营选择", EditorStyles.miniBoldLabel);
+                EditorGUILayout.LabelField("??????", EditorStyles.miniBoldLabel);
 
                 if (manager == null || factionNameArray.Length == 0)
                 {
-                    // 没有FactionManager时的回退方案
-                    EditorGUILayout.PropertyField(factionNameProperty, new GUIContent("阵营名称"));
-                    EditorGUILayout.HelpBox("暂无可用阵营配置", MessageType.Info);
+                    // ???FactionManager?????????
+                    EditorGUILayout.PropertyField(factionNameProperty, new GUIContent("???????"));
+                    EditorGUILayout.HelpBox("??????????????", MessageType.Info);
                 }
                 else
                 {
-                    // 刷新选择索引
+                    // ??????????
                     RefreshSelectedIndex();
 
                     EditorGUILayout.BeginHorizontal();
                     {
-                        // 阵营下拉选择器
-                        int newIndex = EditorGUILayout.Popup("选择阵营", selectedFactionIndex, factionNameArray);
+                        // ????????????
+                        int newIndex = EditorGUILayout.Popup("??????", selectedFactionIndex, factionNameArray);
 
                         if (newIndex != selectedFactionIndex)
                         {
@@ -83,8 +83,8 @@ namespace TechCosmos.FactionForge.Editor
                             factionNameProperty.stringValue = factionNameArray[newIndex];
                         }
 
-                        // 刷新按钮
-                        if (GUILayout.Button("刷新", GUILayout.Width(50)))
+                        // ??°??
+                        if (GUILayout.Button("???", GUILayout.Width(50)))
                         {
                             RefreshFactionList();
                             RefreshSelectedIndex();
@@ -92,10 +92,10 @@ namespace TechCosmos.FactionForge.Editor
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    // 自定义输入开关
+                    // ???????????
                     EditorGUILayout.BeginHorizontal();
                     {
-                        showCustomInput = EditorGUILayout.Toggle("自定义输入", showCustomInput, GUILayout.Width(100));
+                        showCustomInput = EditorGUILayout.Toggle("?????????", showCustomInput, GUILayout.Width(100));
 
                         if (showCustomInput)
                         {
@@ -103,13 +103,13 @@ namespace TechCosmos.FactionForge.Editor
                         }
                         else
                         {
-                            EditorGUILayout.LabelField($"当前: {factionNameProperty.stringValue}", EditorStyles.miniLabel);
+                            EditorGUILayout.LabelField($"???: {factionNameProperty.stringValue}", EditorStyles.miniLabel);
                         }
                     }
                     EditorGUILayout.EndHorizontal();
 
-                    // 显示阵营统计
-                    EditorGUILayout.LabelField($"已配置 {factionNameArray.Length} 个阵营", EditorStyles.miniLabel);
+                    // ?????????
+                    EditorGUILayout.LabelField($"?????? {factionNameArray.Length} ?????", EditorStyles.miniLabel);
                 }
             }
             EditorGUILayout.EndVertical();
@@ -117,15 +117,15 @@ namespace TechCosmos.FactionForge.Editor
 
         private void DrawRelationshipPreview()
         {
-            EditorGUILayout.LabelField("阵营关系预览", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("?????????", EditorStyles.boldLabel);
 
             FactionManager manager = FindFactionManager();
 
             if (manager == null)
             {
-                EditorGUILayout.HelpBox("场景中未找到 FactionManager", MessageType.Warning);
+                EditorGUILayout.HelpBox("??????δ??? FactionManager", MessageType.Warning);
 
-                if (GUILayout.Button("创建 FactionManager"))
+                if (GUILayout.Button("???? FactionManager"))
                 {
                     CreateFactionManager();
                     RefreshFactionList();
@@ -135,7 +135,7 @@ namespace TechCosmos.FactionForge.Editor
 
             if (string.IsNullOrEmpty(factionMember.FactionName))
             {
-                EditorGUILayout.HelpBox("请先选择阵营", MessageType.Info);
+                EditorGUILayout.HelpBox("??????????", MessageType.Info);
                 return;
             }
 
@@ -151,10 +151,10 @@ namespace TechCosmos.FactionForge.Editor
 
                     EditorGUILayout.BeginHorizontal();
                     {
-                        // 阵营名称和关系状态
+                        // ????????????
                         EditorGUILayout.LabelField(faction.factionName, GUILayout.Width(80));
 
-                        // 关系颜色标签
+                        // ?????????
                         var style = new GUIStyle(EditorStyles.miniLabel);
                         style.normal.textColor = GetRelationshipColor(relationship);
                         style.alignment = TextAnchor.MiddleCenter;
@@ -162,7 +162,7 @@ namespace TechCosmos.FactionForge.Editor
 
                         EditorGUILayout.LabelField(relationship.ToString(), style, GUILayout.Width(60));
 
-                        // 快速关系设置按钮
+                        // ????????????
                         if (GUILayout.Button("...", GUILayout.Width(20)))
                         {
                             ShowRelationshipQuickMenu(faction.factionName, relationship);
@@ -175,7 +175,7 @@ namespace TechCosmos.FactionForge.Editor
 
                 if (!hasRelationships)
                 {
-                    EditorGUILayout.HelpBox("这是唯一的阵营，暂无其他关系", MessageType.Info);
+                    EditorGUILayout.HelpBox("????Ψ???????????????????", MessageType.Info);
                 }
             }
             EditorGUILayout.EndVertical();
@@ -183,19 +183,19 @@ namespace TechCosmos.FactionForge.Editor
 
         private void DrawQuickActions()
         {
-            EditorGUILayout.LabelField("快速操作", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("???????", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginVertical("box");
             {
                 EditorGUILayout.BeginHorizontal();
                 {
-                    if (GUILayout.Button("测试关系"))
+                    if (GUILayout.Button("??????"))
                     {
                         TestAllRelationships();
                     }
 
                     FactionManager manager = FindFactionManager();
-                    if (manager != null && GUILayout.Button("打开管理器"))
+                    if (manager != null && GUILayout.Button("???????"))
                     {
                         Selection.activeObject = manager.gameObject;
                     }
@@ -204,13 +204,13 @@ namespace TechCosmos.FactionForge.Editor
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    if (GUILayout.Button("刷新列表"))
+                    if (GUILayout.Button("????б?"))
                     {
                         RefreshFactionList();
                         RefreshSelectedIndex();
                     }
 
-                    if (GUILayout.Button("创建新阵营"))
+                    if (GUILayout.Button("?????????"))
                     {
                         ShowCreateFactionDialog();
                     }
@@ -258,13 +258,13 @@ namespace TechCosmos.FactionForge.Editor
         {
             GenericMenu menu = new GenericMenu();
 
-            menu.AddItem(new GUIContent("设为敌对"), currentRelationship == FactionRelationship.Hostile,
+            menu.AddItem(new GUIContent("????ж?"), currentRelationship == FactionRelationship.Hostile,
                 () => SetRelationship(targetFaction, FactionRelationship.Hostile));
-            menu.AddItem(new GUIContent("设为中立"), currentRelationship == FactionRelationship.Neutral,
+            menu.AddItem(new GUIContent("???????"), currentRelationship == FactionRelationship.Neutral,
                 () => SetRelationship(targetFaction, FactionRelationship.Neutral));
-            menu.AddItem(new GUIContent("设为友好"), currentRelationship == FactionRelationship.Friendly,
+            menu.AddItem(new GUIContent("??????"), currentRelationship == FactionRelationship.Friendly,
                 () => SetRelationship(targetFaction, FactionRelationship.Friendly));
-            menu.AddItem(new GUIContent("设为同盟"), currentRelationship == FactionRelationship.Allied,
+            menu.AddItem(new GUIContent("??????"), currentRelationship == FactionRelationship.Allied,
                 () => SetRelationship(targetFaction, FactionRelationship.Allied));
 
             menu.ShowAsContext();
@@ -273,12 +273,22 @@ namespace TechCosmos.FactionForge.Editor
         private void SetRelationship(string targetFaction, FactionRelationship relationship)
         {
             FactionManager manager = FindFactionManager();
-            if (manager != null)
+            if (manager == null)
+                return;
+
+            if (!FactionEditorUtility.TrySetRelationship(
+                    manager,
+                    factionMember.FactionName,
+                    targetFaction,
+                    relationship))
             {
-                manager.SetRelationship(factionMember.FactionName, targetFaction, relationship);
-                EditorUtility.SetDirty(manager);
-                Debug.Log($"已设置 {factionMember.FactionName} 与 {targetFaction} 的关系为 {relationship}");
+                Debug.LogWarning($"无法设置 {factionMember.FactionName} 与 {targetFaction} 的关系，请检查阵营名称是否有效。");
+                return;
             }
+
+            var syncHint = FactionEditorSettings.BidirectionalEditMode ? "（已同步双向）" : string.Empty;
+            Debug.Log($"已设置 {factionMember.FactionName} 与 {targetFaction} 的关系为 {relationship}{syncHint}");
+            Repaint();
         }
 
         private void ShowCreateFactionDialog()
@@ -289,11 +299,11 @@ namespace TechCosmos.FactionForge.Editor
                 manager = CreateFactionManager();
             }
 
-            // 简单的新建阵营对话框
-            string newFactionName = EditorInputDialog.Show("新建阵营", "请输入新阵营名称:", "NewFaction");
+            // ??????????????
+            string newFactionName = EditorInputDialog.Show("??????", "???????????????:", "NewFaction");
             if (!string.IsNullOrEmpty(newFactionName))
             {
-                // 检查是否已存在
+                // ???????????
                 bool exists = false;
                 foreach (var faction in manager.factions)
                 {
@@ -311,20 +321,20 @@ namespace TechCosmos.FactionForge.Editor
                     EditorUtility.SetDirty(manager);
                     RefreshFactionList();
 
-                    // 自动选择新创建的阵营
+                    // ????????????????
                     factionNameProperty.stringValue = newFactionName;
                     RefreshSelectedIndex();
 
-                    Debug.Log($"已创建新阵营: {newFactionName}");
+                    Debug.Log($"??????????: {newFactionName}");
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("错误", $"阵营 '{newFactionName}' 已存在!", "确定");
+                    EditorUtility.DisplayDialog("????", $"??? '{newFactionName}' ?????!", "???");
                 }
             }
         }
 
-        // 需要添加这个输入对话框类
+        // ????????????????????
         private class EditorInputDialog : EditorWindow
         {
             private string inputText = "";
@@ -354,11 +364,11 @@ namespace TechCosmos.FactionForge.Editor
                 GUILayout.Space(20);
                 EditorGUILayout.BeginHorizontal();
                 {
-                    if (GUILayout.Button("确定"))
+                    if (GUILayout.Button("???"))
                     {
                         Close();
                     }
-                    if (GUILayout.Button("取消"))
+                    if (GUILayout.Button("???"))
                     {
                         inputText = "";
                         Close();
@@ -368,7 +378,7 @@ namespace TechCosmos.FactionForge.Editor
             }
         }
 
-        // 原有的辅助方法保持不变
+        // ??е???????????????
         private FactionManager FindFactionManager()
         {
             if (FactionManager.Instance != null)
@@ -401,18 +411,18 @@ namespace TechCosmos.FactionForge.Editor
             FactionManager manager = FindFactionManager();
             if (manager == null)
             {
-                Debug.LogError("测试失败：场景中未找到 FactionManager");
+                Debug.LogError("??????????????δ??? FactionManager");
                 return;
             }
 
-            Debug.Log($"=== {factionMember.name} 的阵营关系测试 ===");
+            Debug.Log($"=== {factionMember.name} ???????????? ===");
 
             foreach (var faction in manager.factions)
             {
                 if (faction.factionName != factionMember.FactionName)
                 {
                     var rel = manager.GetRelationship(factionMember.FactionName, faction.factionName);
-                    Debug.Log($"{factionMember.FactionName} ←→ {faction.factionName} : {rel}");
+                    Debug.Log($"{factionMember.FactionName} ???? {faction.factionName} : {rel}");
                 }
             }
         }

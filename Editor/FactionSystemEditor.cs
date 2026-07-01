@@ -1,9 +1,9 @@
-#if UNITY_EDITOR
+ï»¿#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 using TechCosmos.FactionForge.Runtime;
-using static UnityEngine.GraphicsBuffer;
+
 namespace TechCosmos.FactionForge.Editor
 {
     [CustomEditor(typeof(FactionManager))]
@@ -11,8 +11,6 @@ namespace TechCosmos.FactionForge.Editor
     {
         private FactionManager manager;
         private SerializedProperty factionsProperty;
-
-        // ÓÃÓÚ¸ú×ÙÃ¿¸öÕóÓªµÄÕÛµş×´Ì¬
         private Dictionary<string, bool> factionFoldouts = new Dictionary<string, bool>();
 
         private void OnEnable()
@@ -26,9 +24,10 @@ namespace TechCosmos.FactionForge.Editor
             serializedObject.Update();
 
             EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("ÕóÓª¹ØÏµÏµÍ³", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("é˜µè¥å…³ç³»ç³»ç»Ÿ", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
 
+            DrawEditModeSettings();
             DrawFactionsList();
 
             EditorGUILayout.Space(10);
@@ -37,11 +36,71 @@ namespace TechCosmos.FactionForge.Editor
             serializedObject.ApplyModifiedProperties();
         }
 
+        private void DrawEditModeSettings()
+        {
+            EditorGUILayout.BeginVertical("box");
+            {
+                EditorGUILayout.LabelField("ç¼–è¾‘æ¨¡å¼", EditorStyles.boldLabel);
+
+                bool bidirectional = FactionEditorSettings.BidirectionalEditMode;
+                bool newBidirectional = EditorGUILayout.ToggleLeft("åŒå‘ç»‘å®šï¼ˆä¿®æ”¹ä¸€ä¾§æ—¶è‡ªåŠ¨åŒæ­¥å¦ä¸€ä¾§ï¼‰", bidirectional);
+                if (newBidirectional != bidirectional)
+                    FactionEditorSettings.BidirectionalEditMode = newBidirectional;
+
+                if (newBidirectional)
+                    EditorGUILayout.HelpBox("å·²å¯ç”¨åŒå‘ç»‘å®šï¼šè®¾ç½® Aâ†’B çš„å…³ç³»æ—¶ä¼šåŒæ—¶è®¾ç½® Bâ†’Aã€‚", MessageType.Info);
+                else
+                    EditorGUILayout.HelpBox("å•å‘ç¼–è¾‘ï¼šAâ†’B ä¸ Bâ†’A å¯åˆ†åˆ«è®¾ç½®ï¼Œé€‚åˆéå¯¹ç§°å…³ç³»è®¾è®¡ã€‚", MessageType.None);
+
+                if (manager.HasDuplicateFactionNames())
+                    EditorGUILayout.HelpBox("å­˜åœ¨é‡å¤çš„é˜µè¥åç§°ï¼Œå…³ç³»ç¼–è¾‘å¯èƒ½æŒ‡å‘é”™è¯¯é˜µè¥ï¼Œè¯·å…ˆä¿®æ­£åç§°ã€‚", MessageType.Error);
+
+                int asymmetricCount = CountAsymmetricRelationships();
+                if (asymmetricCount > 0)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUILayout.HelpBox($"æ£€æµ‹åˆ° {asymmetricCount} å¯¹éå¯¹ç§°å…³ç³»ã€‚", MessageType.Warning);
+                        if (GUILayout.Button("å…¨éƒ¨åŒæ­¥", GUILayout.Width(80), GUILayout.Height(38)))
+                        {
+                            Undo.RecordObject(manager, "Sync Faction Relationships");
+                            int synced = manager.SyncAllRelationshipsBidirectional();
+                            serializedObject.Update();
+                            EditorUtility.SetDirty(manager);
+                            Debug.Log($"å·²å°† {synced} å¯¹éå¯¹ç§°å…³ç³»åŒæ­¥ä¸ºåŒå‘ä¸€è‡´ã€‚");
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+            }
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space(5);
+        }
+
+        private int CountAsymmetricRelationships()
+        {
+            if (manager == null || manager.factions.Count < 2)
+                return 0;
+
+            int count = 0;
+            for (int i = 0; i < manager.factions.Count; i++)
+            {
+                for (int j = i + 1; j < manager.factions.Count; j++)
+                {
+                    if (!manager.AreRelationshipsSymmetric(
+                            manager.factions[i].factionName,
+                            manager.factions[j].factionName))
+                        count++;
+                }
+            }
+
+            return count;
+        }
+
         private void DrawFactionsList()
         {
-            EditorGUILayout.LabelField("ÕóÓªÅäÖÃ", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("é˜µè¥é…ç½®", EditorStyles.boldLabel);
 
-            // ÕóÓªÁĞ±í
             for (int i = 0; i < factionsProperty.arraySize; i++)
             {
                 EditorGUILayout.BeginVertical("box");
@@ -49,96 +108,173 @@ namespace TechCosmos.FactionForge.Editor
                     var factionProperty = factionsProperty.GetArrayElementAtIndex(i);
                     var nameProperty = factionProperty.FindPropertyRelative("factionName");
 
-                    // ÕÛµş±êÌâ
-                    string factionName = string.IsNullOrEmpty(nameProperty.stringValue) ? "Î´ÃüÃûÕóÓª" : nameProperty.stringValue;
+                    string factionName = string.IsNullOrEmpty(nameProperty.stringValue) ? "æœªå‘½åé˜µè¥" : nameProperty.stringValue;
                     string foldoutKey = $"{factionName}_{i}";
 
                     if (!factionFoldouts.ContainsKey(foldoutKey))
                         factionFoldouts[foldoutKey] = true;
 
-                    factionFoldouts[foldoutKey] = EditorGUILayout.Foldout(factionFoldouts[foldoutKey], $"ÕóÓª: {factionName}", true);
+                    factionFoldouts[foldoutKey] = EditorGUILayout.Foldout(factionFoldouts[foldoutKey], $"é˜µè¥: {factionName}", true);
 
                     if (factionFoldouts[foldoutKey])
                     {
                         EditorGUILayout.BeginHorizontal();
                         {
-                            // ÕóÓªÃû³ÆÊäÈë
-                            EditorGUILayout.PropertyField(nameProperty, new GUIContent("ÕóÓªÃû³Æ"));
+                            EditorGUI.BeginChangeCheck();
+                            EditorGUILayout.PropertyField(nameProperty, new GUIContent("é˜µè¥åç§°"));
+                            if (EditorGUI.EndChangeCheck())
+                                HandleFactionRename(i, nameProperty);
 
-                            // É¾³ı°´Å¥
-                            if (GUILayout.Button("É¾³ı", GUILayout.Width(60)))
+                            if (GUILayout.Button("åˆ é™¤", GUILayout.Width(60)))
                             {
+                                Undo.RecordObject(manager, "Remove Faction");
                                 factionsProperty.DeleteArrayElementAtIndex(i);
                                 serializedObject.ApplyModifiedProperties();
                                 manager.RefreshAllRelationships();
+                                EditorUtility.SetDirty(manager);
+                                serializedObject.Update();
                                 return;
                             }
                         }
                         EditorGUILayout.EndHorizontal();
 
-                        // ÏÔÊ¾¹ØÏµÊıÁ¿
+                        if (i < manager.factions.Count &&
+                            !FactionManager.IsValidFactionName(manager.factions[i].factionName))
+                        {
+                            EditorGUILayout.HelpBox("è¯·å…ˆå¡«å†™é˜µè¥åç§°ï¼Œå†é…ç½®å…³ç³»ã€‚", MessageType.Warning);
+                        }
+
                         var relationshipsProperty = factionProperty.FindPropertyRelative("relationships");
-                        EditorGUILayout.LabelField($"¹ØÏµÊıÁ¿: {GetRelationshipCount(relationshipsProperty)}", EditorStyles.miniLabel);
+                        EditorGUILayout.LabelField($"å…³ç³»æ•°é‡: {GetRelationshipCount(relationshipsProperty)}", EditorStyles.miniLabel);
                     }
                 }
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.Space(5);
             }
 
-            // Ìí¼ÓĞÂÕóÓª°´Å¥
             EditorGUILayout.BeginHorizontal();
             {
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("+ Ìí¼ÓĞÂÕóÓª", GUILayout.Width(120)))
+                if (GUILayout.Button("+ æ·»åŠ æ–°é˜µè¥", GUILayout.Width(120)))
                 {
+                    Undo.RecordObject(manager, "Add Faction");
+                    int newIndex = factionsProperty.arraySize;
                     factionsProperty.arraySize++;
+                    var newFactionProperty = factionsProperty.GetArrayElementAtIndex(newIndex);
+                    var newNameProperty = newFactionProperty.FindPropertyRelative("factionName");
+                    newNameProperty.stringValue = FactionEditorUtility.GetUniqueFactionName(manager, "NewFaction");
                     serializedObject.ApplyModifiedProperties();
                     manager.RefreshAllRelationships();
+                    EditorUtility.SetDirty(manager);
+                    serializedObject.Update();
                 }
                 GUILayout.FlexibleSpace();
             }
             EditorGUILayout.EndHorizontal();
         }
 
+        private void HandleFactionRename(int index, SerializedProperty nameProperty)
+        {
+            if (index >= manager.factions.Count)
+                return;
+
+            string newName = nameProperty.stringValue?.Trim() ?? string.Empty;
+            string oldName = manager.factions[index].factionName ?? string.Empty;
+
+            if (newName == oldName)
+                return;
+
+            if (!FactionManager.IsValidFactionName(newName))
+            {
+                if (FactionManager.IsValidFactionName(oldName))
+                    nameProperty.stringValue = oldName;
+                return;
+            }
+
+            if (FactionEditorUtility.FactionNameExistsExcept(manager, newName, index))
+            {
+                Debug.LogWarning($"é˜µè¥åç§° \"{newName}\" å·²å­˜åœ¨ï¼Œè¯·ä½¿ç”¨å…¶ä»–åç§°ã€‚");
+                nameProperty.stringValue = oldName;
+                return;
+            }
+
+            Undo.RecordObject(manager, "Rename Faction");
+
+            if (FactionManager.IsValidFactionName(oldName))
+            {
+                if (!manager.RenameFaction(oldName, newName))
+                    nameProperty.stringValue = oldName;
+            }
+            else
+            {
+                manager.factions[index].factionName = newName;
+                manager.RefreshAllRelationships();
+            }
+
+            serializedObject.Update();
+            EditorUtility.SetDirty(manager);
+        }
+
         private void DrawRelationshipMatrix()
         {
             if (manager == null || manager.factions.Count < 2)
             {
-                EditorGUILayout.HelpBox("ÖÁÉÙĞèÒª2¸öÕóÓª²ÅÄÜÏÔÊ¾¹ØÏµÅäÖÃ", MessageType.Info);
+                EditorGUILayout.HelpBox("è‡³å°‘éœ€è¦2ä¸ªé˜µè¥æ‰èƒ½æ˜¾ç¤ºå…³ç³»é…ç½®", MessageType.Info);
                 return;
             }
 
-            EditorGUILayout.LabelField("ÕóÓª¹ØÏµ¾ØÕó", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("é˜µè¥å…³ç³»çŸ©é˜µ", EditorStyles.boldLabel);
             EditorGUILayout.Space(5);
 
-            // »æÖÆ¹ØÏµ¾ØÕó
             for (int i = 0; i < manager.factions.Count; i++)
             {
                 var currentFaction = manager.factions[i];
 
                 EditorGUILayout.BeginVertical("box");
                 {
-                    EditorGUILayout.LabelField($"{currentFaction.factionName} ¶ÔÆäËûÕóÓªµÄ¹ØÏµ:", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField($"{currentFaction.factionName} å¯¹å…¶ä»–é˜µè¥çš„å…³ç³»:", EditorStyles.boldLabel);
+
+                    if (!FactionManager.IsValidFactionName(currentFaction.factionName))
+                    {
+                        EditorGUILayout.HelpBox("è¯¥é˜µè¥å°šæœªå‘½åï¼Œæ— æ³•ç¼–è¾‘å…³ç³»ã€‚", MessageType.Info);
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.Space(5);
+                        continue;
+                    }
 
                     for (int j = 0; j < manager.factions.Count; j++)
                     {
-                        if (i == j) continue; // Ìø¹ı×Ô¼º
+                        if (i == j)
+                            continue;
 
                         var otherFaction = manager.factions[j];
-                        var currentRelationship = currentFaction.relationships.ContainsKey(otherFaction.factionName)
-                            ? currentFaction.relationships[otherFaction.factionName]
-                            : FactionRelationship.Neutral;
 
                         EditorGUILayout.BeginHorizontal();
                         {
+                            if (!FactionManager.IsValidFactionName(otherFaction.factionName))
+                            {
+                                EditorGUILayout.LabelField("(æœªå‘½åé˜µè¥)", GUILayout.Width(100));
+                                EditorGUILayout.LabelField("-", EditorStyles.miniLabel);
+                                EditorGUILayout.EndHorizontal();
+                                continue;
+                            }
+
+                            var currentRelationship = manager.GetRelationship(
+                                currentFaction.factionName,
+                                otherFaction.factionName);
+
                             EditorGUILayout.LabelField(otherFaction.factionName, GUILayout.Width(100));
 
+                            EditorGUI.BeginChangeCheck();
                             var newRelationship = (FactionRelationship)EditorGUILayout.EnumPopup(currentRelationship);
-
-                            if (newRelationship != currentRelationship)
+                            if (EditorGUI.EndChangeCheck() &&
+                                FactionEditorUtility.TrySetRelationship(
+                                    manager,
+                                    currentFaction.factionName,
+                                    otherFaction.factionName,
+                                    newRelationship))
                             {
-                                currentFaction.relationships[otherFaction.factionName] = newRelationship;
-                                EditorUtility.SetDirty(manager);
+                                serializedObject.Update();
                             }
                         }
                         EditorGUILayout.EndHorizontal();
@@ -151,7 +287,6 @@ namespace TechCosmos.FactionForge.Editor
 
         private int GetRelationshipCount(SerializedProperty relationshipsProperty)
         {
-            // »ñÈ¡ĞòÁĞ»¯×ÖµäÖĞµÄ¹ØÏµÊıÁ¿
             var keysProperty = relationshipsProperty.FindPropertyRelative("keys");
             return keysProperty?.arraySize ?? 0;
         }

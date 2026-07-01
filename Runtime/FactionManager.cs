@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace TechCosmos.FactionForge.Runtime
 {
     public class FactionManager : MonoBehaviour
@@ -24,73 +25,176 @@ namespace TechCosmos.FactionForge.Runtime
 
         private void InitializeRelationships()
         {
-            // 确保所有阵营的关系字典都是最新的
             foreach (var faction in factions)
-            {
                 UpdateFactionRelationships(faction);
-            }
         }
 
         private void UpdateFactionRelationships(Faction faction)
         {
-            // 为当前阵营更新与其他所有阵营的关系条目
+            if (!IsValidFactionName(faction.factionName))
+                return;
+
             foreach (var otherFaction in factions)
             {
-                if (otherFaction.factionName != faction.factionName)
+                if (otherFaction.factionName != faction.factionName &&
+                    IsValidFactionName(otherFaction.factionName))
                 {
                     if (!faction.relationships.ContainsKey(otherFaction.factionName))
-                    {
                         faction.relationships[otherFaction.factionName] = FactionRelationship.Neutral;
-                    }
                 }
             }
 
-            // 移除已经不存在的阵营关系
             var keysToRemove = new List<string>();
             foreach (var relationship in faction.relationships)
             {
                 if (!FactionExists(relationship.Key))
-                {
                     keysToRemove.Add(relationship.Key);
-                }
             }
 
             foreach (var key in keysToRemove)
-            {
                 faction.relationships.Remove(key);
-            }
         }
 
         private bool FactionExists(string factionName)
         {
-            return factions.Exists(f => f.factionName == factionName);
+            return IsValidFactionName(factionName) &&
+                   factions.Exists(f => f.factionName == factionName);
         }
 
-        // 公开API
+        public static bool IsValidFactionName(string factionName)
+        {
+            return !string.IsNullOrWhiteSpace(factionName);
+        }
+
+        public bool HasDuplicateFactionNames()
+        {
+            var seen = new HashSet<string>();
+            foreach (var faction in factions)
+            {
+                if (!IsValidFactionName(faction.factionName))
+                    continue;
+
+                if (!seen.Add(faction.factionName))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public bool CanConfigureRelationship(string factionA, string factionB)
+        {
+            if (!IsValidFactionName(factionA) || !IsValidFactionName(factionB))
+                return false;
+
+            if (factionA == factionB)
+                return false;
+
+            if (!FactionExists(factionA) || !FactionExists(factionB))
+                return false;
+
+            return true;
+        }
+
         public FactionRelationship GetRelationship(string factionA, string factionB)
         {
-            // 如果是同一个阵营，返回友方
             if (factionA == factionB)
                 return FactionRelationship.Friendly;
 
             var faction = factions.Find(f => f.factionName == factionA);
             if (faction != null && faction.relationships.ContainsKey(factionB))
-            {
                 return faction.relationships[factionB];
-            }
+
             return FactionRelationship.Neutral;
         }
 
-        public void SetRelationship(string factionA, string factionB, FactionRelationship relationship)
+        public void SetRelationship(string factionA, string factionB, FactionRelationship relationship, bool bidirectional = false)
+        {
+            if (!CanConfigureRelationship(factionA, factionB))
+                return;
+
+            SetRelationshipOneWay(factionA, factionB, relationship);
+
+            if (bidirectional)
+                SetRelationshipOneWay(factionB, factionA, relationship);
+        }
+
+        private void SetRelationshipOneWay(string factionA, string factionB, FactionRelationship relationship)
         {
             var faction = factions.Find(f => f.factionName == factionA);
             if (faction != null && FactionExists(factionB))
-            {
                 faction.relationships[factionB] = relationship;
-            }
         }
 
-        // Editor工具调用的方法
+        public bool AreRelationshipsSymmetric(string factionA, string factionB)
+        {
+            if (factionA == factionB)
+                return true;
+
+            if (!CanConfigureRelationship(factionA, factionB))
+                return true;
+
+            return GetRelationship(factionA, factionB) == GetRelationship(factionB, factionA);
+        }
+
+        public bool RenameFaction(string oldName, string newName)
+        {
+            if (!IsValidFactionName(oldName) || !IsValidFactionName(newName))
+                return false;
+
+            if (oldName == newName)
+                return true;
+
+            var faction = factions.Find(f => f.factionName == oldName);
+            if (faction == null)
+                return false;
+
+            if (factions.Exists(f => f != faction && f.factionName == newName))
+                return false;
+
+            faction.factionName = newName;
+
+            foreach (var otherFaction in factions)
+            {
+                if (otherFaction.relationships.ContainsKey(oldName))
+                {
+                    var relationship = otherFaction.relationships[oldName];
+                    otherFaction.relationships.Remove(oldName);
+                    otherFaction.relationships[newName] = relationship;
+                }
+            }
+
+            InitializeRelationships();
+            return true;
+        }
+
+        public int SyncAllRelationshipsBidirectional()
+        {
+            int syncedCount = 0;
+
+            for (int i = 0; i < factions.Count; i++)
+            {
+                for (int j = i + 1; j < factions.Count; j++)
+                {
+                    var nameA = factions[i].factionName;
+                    var nameB = factions[j].factionName;
+
+                    if (!CanConfigureRelationship(nameA, nameB))
+                        continue;
+
+                    var relAtoB = GetRelationship(nameA, nameB);
+                    var relBtoA = GetRelationship(nameB, nameA);
+
+                    if (relAtoB != relBtoA)
+                    {
+                        SetRelationship(nameA, nameB, relAtoB, bidirectional: true);
+                        syncedCount++;
+                    }
+                }
+            }
+
+            return syncedCount;
+        }
+
         public void RefreshAllRelationships()
         {
             InitializeRelationships();
